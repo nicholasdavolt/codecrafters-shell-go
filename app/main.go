@@ -12,4 +12,6 @@ var _ = os.Stdout
 func main() {
 	r := newREPL()
 	r.start()
+
+	os.Exit(r.mExitCode)
 }
