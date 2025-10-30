@@ -7,9 +7,9 @@ import (
 )
 
 type REPL struct {
-	mRunning  bool
-	mExitCode int
-	mCommands []Command
+	running  bool
+	exitCode int
+	commands []Command
 }
 
 type Command struct {
@@ -21,11 +21,20 @@ type Command struct {
 func newREPL() *REPL {
 
 	return &REPL{
-		mRunning: false,
+		running: false,
 	}
 }
 
 func (r *REPL) start() {
+
+	r.running = true
+	r.registerCommands()
+
+	r.read()
+
+}
+
+func (r *REPL) registerCommands() {
 	exitCommand := Command{
 		name: "exit",
 		desc: "exit command, takes an exit code",
@@ -38,16 +47,18 @@ func (r *REPL) start() {
 		exec: echoExecution,
 	}
 
-	r.mCommands = append(r.mCommands, exitCommand, echoCommand)
-	r.mRunning = true
+	typeCommand := Command{
+		name: "type",
+		desc: "type command",
+		exec: typeExcecution,
+	}
 
-	r.read()
-
+	r.commands = append(r.commands, exitCommand, echoCommand, typeCommand)
 }
 
 func (r *REPL) read() {
 	scanner := bufio.NewScanner(os.Stdin)
-	for r.mRunning {
+	for r.running {
 		fmt.Fprint(os.Stdout, "$ ")
 		if !scanner.Scan() {
 			break
@@ -64,7 +75,7 @@ func (r *REPL) read() {
 func (r *REPL) evaluate(input string) {
 	uC := newUserCommand(input)
 
-	for _, cmd := range r.mCommands {
+	for _, cmd := range r.commands {
 		if uC.mCommand == cmd.name {
 			err := cmd.exec(r, uC.mArgs)
 			if err != nil {

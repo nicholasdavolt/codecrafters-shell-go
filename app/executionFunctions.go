@@ -18,17 +18,32 @@ func exitExecution(r *REPL, args []string) error {
 
 		return err
 	}
-	r.mExitCode = exitCode
-	r.mRunning = false
+	r.exitCode = exitCode
+	r.running = false
 
 	return nil
 }
 
 func echoExecution(r *REPL, args []string) error {
-	if len(args) == 0 {
-		return errors.New("no arguments provided")
-	}
 
 	fmt.Println(strings.Join(args, " "))
+	return nil
+}
+
+func typeExcecution(r *REPL, args []string) error {
+	if len(args) != 1 {
+		return errors.New("wrong number of arguments")
+	}
+
+	arg := args[0]
+
+	for _, cmd := range r.commands {
+		if cmd.name == arg {
+			fmt.Println(arg + " is a shell builtin")
+			return nil
+		}
+	}
+
+	fmt.Println(arg + ": not found")
 	return nil
 }

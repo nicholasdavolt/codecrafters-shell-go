@@ -13,5 +13,5 @@ func main() {
 	r := newREPL()
 	r.start()
 
-	os.Exit(r.mExitCode)
+	os.Exit(r.exitCode)
 }
