@@ -2,10 +2,8 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
-	"strconv"
 )
 
 type REPL struct {
@@ -26,22 +24,6 @@ func newREPL() *REPL {
 		mRunning: false,
 	}
 }
-func exitExecution(r *REPL, args []string) error {
-	if len(args) == 0 {
-
-		return errors.New("no exit code provided")
-	}
-	exitCode, err := strconv.Atoi(args[0])
-
-	if err != nil {
-
-		return err
-	}
-	r.mExitCode = exitCode
-	r.mRunning = false
-
-	return nil
-}
 
 func (r *REPL) start() {
 	exitCommand := Command{
@@ -50,7 +32,13 @@ func (r *REPL) start() {
 		exec: exitExecution,
 	}
 
-	r.mCommands = append(r.mCommands, exitCommand)
+	echoCommand := Command{
+		name: "echo",
+		desc: "echo command",
+		exec: echoExecution,
+	}
+
+	r.mCommands = append(r.mCommands, exitCommand, echoCommand)
 	r.mRunning = true
 
 	r.read()
@@ -65,7 +53,7 @@ func (r *REPL) read() {
 			break
 		}
 		input := scanner.Text()
-		r.ealuate(input)
+		r.evaluate(input)
 
 	}
 	if err := scanner.Err(); err != nil {
@@ -73,7 +61,7 @@ func (r *REPL) read() {
 	}
 }
 
-func (r *REPL) ealuate(input string) {
+func (r *REPL) evaluate(input string) {
 	uC := newUserCommand(input)
 
 	for _, cmd := range r.mCommands {
