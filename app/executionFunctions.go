@@ -53,7 +53,7 @@ func typeExcecution(r *REPL, args []string) error {
 				continue
 			}
 
-			if file.Type().Perm()&0100 != 0 {
+			if file.Type().Perm()&0100 == 0 {
 				fmt.Println(arg + " is " + path + "/" + file.Name())
 				return nil
 			}
