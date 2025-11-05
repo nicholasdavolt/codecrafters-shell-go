@@ -46,14 +46,16 @@ func typeExcecution(r *REPL, args []string) error {
 	}
 
 	for _, path := range r.path {
+		fmt.Println("current Path is " + path)
 		files, _ := os.ReadDir(path)
 
 		for _, file := range files {
+			fmt.Println(file.Name() + " is the current file")
 			if file.Name() != arg || file.IsDir() {
 				continue
 			}
 
-			if file.Type().Perm()&0100 != 0 {
+			if file.Type().Perm()&0111 != 0 {
 				fmt.Println(arg + " is " + path + "/" + file.Name())
 				return nil
 			}
