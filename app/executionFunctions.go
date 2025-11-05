@@ -46,10 +46,7 @@ func typeExcecution(r *REPL, args []string) error {
 	}
 
 	for _, path := range r.path {
-		files, err := os.ReadDir(path)
-		if err != nil {
-			return err
-		}
+		files, _ := os.ReadDir(path)
 
 		for _, file := range files {
 			if file.Name() != arg || file.IsDir() {
