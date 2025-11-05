@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -41,6 +42,25 @@ func typeExcecution(r *REPL, args []string) error {
 		if cmd.name == arg {
 			fmt.Println(arg + " is a shell builtin")
 			return nil
+		}
+	}
+
+	for _, path := range r.path {
+		files, err := os.ReadDir(path)
+		if err != nil {
+			return err
+		}
+
+		for _, file := range files {
+			if file.Name() != arg || file.IsDir() {
+				continue
+			}
+
+			if file.Type().Perm()&0111 == 0 {
+				fmt.Println(arg + " is " + path + "/" + file.Name())
+				return nil
+			}
+
 		}
 	}
 

@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type REPL struct {
 	running  bool
 	exitCode int
+	path     []string
 	commands []Command
 }
 
@@ -29,6 +31,7 @@ func (r *REPL) start() {
 
 	r.running = true
 	r.registerCommands()
+	r.registerPath()
 
 	r.read()
 
@@ -54,6 +57,19 @@ func (r *REPL) registerCommands() {
 	}
 
 	r.commands = append(r.commands, exitCommand, echoCommand, typeCommand)
+}
+
+func (r *REPL) registerPath() {
+	osPath := os.Getenv("PATH")
+
+	if osPath == "" {
+		fmt.Fprintln(os.Stderr, "PATH environment variable not set")
+		return
+	}
+
+	sep := string(os.PathListSeparator)
+
+	r.path = append(r.path, strings.Split(osPath, sep)...)
 }
 
 func (r *REPL) read() {
