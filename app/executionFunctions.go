@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -45,23 +45,13 @@ func typeExcecution(r *REPL, args []string) error {
 		}
 	}
 
-	for _, path := range r.path {
-		files, _ := os.ReadDir(path)
+	path, err := exec.LookPath(arg)
 
-		for _, file := range files {
-
-			if file.Name() != arg || file.IsDir() {
-				continue
-			}
-
-			if file.Type().Perm()&0111 != 0 {
-				fmt.Println(arg + " is " + path + "/" + file.Name())
-				return nil
-			}
-
-		}
+	if err != nil {
+		fmt.Println(arg + ": not found")
+		return nil
 	}
 
-	fmt.Println(arg + ": not found")
+	fmt.Println(arg + " is " + path)
 	return nil
 }
