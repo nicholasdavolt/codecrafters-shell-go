@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 type REPL struct {
@@ -29,7 +30,6 @@ func (r *REPL) start() {
 
 	r.running = true
 	r.registerCommands()
-
 	r.read()
 
 }
@@ -76,13 +76,27 @@ func (r *REPL) evaluate(input string) {
 	uC := newUserCommand(input)
 
 	for _, cmd := range r.commands {
-		if uC.mCommand == cmd.name {
-			err := cmd.exec(r, uC.mArgs)
+		if uC.command == cmd.name {
+			err := cmd.exec(r, uC.args)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
 			return
 		}
+	}
+
+	path, err := exec.LookPath(uC.command)
+
+	if err == nil {
+		err = exec.Command(path, uC.args...).Run()
+
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+
+		return
+
 	}
 	r.printBadCommand(input)
 

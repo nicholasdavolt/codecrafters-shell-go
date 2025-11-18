@@ -12,16 +12,16 @@ const (
 )
 
 type userCommand struct {
-	mInput   string
-	mCommand string
-	mArgs    []string
-	mState   state
+	input   string
+	command string
+	args    []string
+	s       state
 }
 
 func newUserCommand(input string) *userCommand {
 	c := userCommand{
-		mInput: input,
-		mState: normal,
+		input: input,
+		s:     normal,
 	}
 	c.parse()
 	return &c
@@ -30,10 +30,10 @@ func newUserCommand(input string) *userCommand {
 func (c *userCommand) parse() {
 	tokens := make([]string, 0)
 	working := ""
-	for i := 0; i < len(c.mInput); i++ {
-		current := string(c.mInput[i])
+	for i := 0; i < len(c.input); i++ {
+		current := string(c.input[i])
 
-		switch c.mState {
+		switch c.s {
 		case normal:
 			if current == " " {
 				tokens = append(tokens, working)
@@ -51,10 +51,10 @@ func (c *userCommand) parse() {
 	case 0:
 		fmt.Println("You need to provide a command.")
 	case 1:
-		c.mCommand = tokens[0]
+		c.command = tokens[0]
 	default:
-		c.mCommand = tokens[0]
-		c.mArgs = tokens[1:]
+		c.command = tokens[0]
+		c.args = tokens[1:]
 
 	}
 }
