@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -28,6 +29,16 @@ func exitExecution(r *REPL, args []string) error {
 func echoExecution(r *REPL, args []string) error {
 
 	fmt.Println(strings.Join(args, " "))
+	return nil
+}
+
+func pwdExecution(r *REPL, args []string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	fmt.Println(cwd)
+
 	return nil
 }
 

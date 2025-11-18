@@ -1,14 +1,12 @@
 package main
 
-import (
-	"fmt"
-)
+import "errors"
 
 type state int
 
 const (
 	normal state = iota
-	singleQote
+	singleQuote
 )
 
 type userCommand struct {
@@ -18,24 +16,33 @@ type userCommand struct {
 	s       state
 }
 
-func newUserCommand(input string) *userCommand {
+func newUserCommand(input string) (*userCommand, error) {
+	if input == "" {
+		return nil, errors.New("empty input")
+	}
 	c := userCommand{
 		input: input,
 		s:     normal,
 	}
 	c.parse()
-	return &c
+
+	return &c, nil
 }
 
 func (c *userCommand) parse() {
 	tokens := make([]string, 0)
+
 	working := ""
+
 	for i := 0; i < len(c.input); i++ {
 		current := string(c.input[i])
 
 		switch c.s {
 		case normal:
 			if current == " " {
+				if working == "" {
+					continue
+				}
 				tokens = append(tokens, working)
 				working = ""
 				continue
@@ -45,11 +52,12 @@ func (c *userCommand) parse() {
 		}
 
 	}
-	tokens = append(tokens, working)
+
+	if working != "" {
+		tokens = append(tokens, working)
+	}
 
 	switch len(tokens) {
-	case 0:
-		fmt.Println("You need to provide a command.")
 	case 1:
 		c.command = tokens[0]
 	default:
@@ -57,4 +65,5 @@ func (c *userCommand) parse() {
 		c.args = tokens[1:]
 
 	}
+
 }

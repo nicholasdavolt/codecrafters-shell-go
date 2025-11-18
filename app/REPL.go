@@ -52,8 +52,13 @@ func (r *REPL) registerCommands() {
 		desc: "type command",
 		exec: typeExcecution,
 	}
+	pwdCommand := Command{
+		name: "pwd",
+		desc: "prints current working directory",
+		exec: pwdExecution,
+	}
 
-	r.commands = append(r.commands, exitCommand, echoCommand, typeCommand)
+	r.commands = append(r.commands, exitCommand, echoCommand, typeCommand, pwdCommand)
 }
 
 func (r *REPL) read() {
@@ -73,7 +78,11 @@ func (r *REPL) read() {
 }
 
 func (r *REPL) evaluate(input string) {
-	uC := newUserCommand(input)
+	uC, err := newUserCommand(input)
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 
 	for _, cmd := range r.commands {
 		if uC.command == cmd.name {
@@ -85,7 +94,7 @@ func (r *REPL) evaluate(input string) {
 		}
 	}
 
-	_, err := exec.LookPath(uC.command)
+	_, err = exec.LookPath(uC.command)
 
 	if err == nil {
 		cmd := exec.Command(uC.command, uC.args...)
