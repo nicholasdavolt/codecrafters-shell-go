@@ -88,7 +88,12 @@ func (r *REPL) evaluate(input string) {
 	path, err := exec.LookPath(uC.command)
 
 	if err == nil {
-		err = exec.Command(path, uC.args...).Run()
+		cmd := exec.Command(path, uC.args...)
+
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
 
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
