@@ -21,9 +21,7 @@ type Command struct {
 
 func newREPL() *REPL {
 
-	return &REPL{
-		running: false,
-	}
+	return &REPL{}
 }
 
 func (r *REPL) start() {
@@ -38,27 +36,32 @@ func (r *REPL) registerCommands() {
 	exitCommand := Command{
 		name: "exit",
 		desc: "exit command, takes an exit code",
-		exec: exitExecution,
+		exec: exitExec,
 	}
 
 	echoCommand := Command{
 		name: "echo",
 		desc: "echo command",
-		exec: echoExecution,
+		exec: echoExec,
 	}
 
 	typeCommand := Command{
 		name: "type",
 		desc: "type command",
-		exec: typeExcecution,
+		exec: typeExec,
 	}
 	pwdCommand := Command{
 		name: "pwd",
 		desc: "prints current working directory",
-		exec: pwdExecution,
+		exec: pwdExec,
+	}
+	cdCommand := Command{
+		name: "cd",
+		desc: "changes current working directory",
+		exec: cdExec,
 	}
 
-	r.commands = append(r.commands, exitCommand, echoCommand, typeCommand, pwdCommand)
+	r.commands = append(r.commands, exitCommand, echoCommand, typeCommand, pwdCommand, cdCommand)
 }
 
 func (r *REPL) read() {
@@ -78,11 +81,10 @@ func (r *REPL) read() {
 }
 
 func (r *REPL) evaluate(input string) {
-	uC, err := newUserCommand(input)
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	if len(input) == 0 {
+		return
 	}
+	uC := newUserCommand(input)
 
 	for _, cmd := range r.commands {
 		if uC.command == cmd.name {
@@ -94,7 +96,7 @@ func (r *REPL) evaluate(input string) {
 		}
 	}
 
-	_, err = exec.LookPath(uC.command)
+	_, err := exec.LookPath(uC.command)
 
 	if err == nil {
 		cmd := exec.Command(uC.command, uC.args...)
@@ -112,7 +114,7 @@ func (r *REPL) evaluate(input string) {
 		return
 
 	}
-	r.printBadCommand(input)
+	r.printBadCommand(uC.command)
 
 }
 

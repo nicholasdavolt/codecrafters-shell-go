@@ -1,7 +1,5 @@
 package main
 
-import "errors"
-
 type state int
 
 const (
@@ -16,17 +14,15 @@ type userCommand struct {
 	s       state
 }
 
-func newUserCommand(input string) (*userCommand, error) {
-	if input == "" {
-		return nil, errors.New("empty input")
-	}
+func newUserCommand(input string) *userCommand {
+
 	c := userCommand{
 		input: input,
 		s:     normal,
 	}
 	c.parse()
 
-	return &c, nil
+	return &c
 }
 
 func (c *userCommand) parse() {
@@ -58,8 +54,11 @@ func (c *userCommand) parse() {
 	}
 
 	switch len(tokens) {
+	case 0:
+		c.command = ""
 	case 1:
 		c.command = tokens[0]
+		c.args = make([]string, 0)
 	default:
 		c.command = tokens[0]
 		c.args = tokens[1:]

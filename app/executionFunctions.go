@@ -9,10 +9,10 @@ import (
 	"strings"
 )
 
-func exitExecution(r *REPL, args []string) error {
+func exitExec(r *REPL, args []string) error {
 	if len(args) == 0 {
-
-		return errors.New("no exit code provided")
+		r.running = false
+		return nil
 	}
 	exitCode, err := strconv.Atoi(args[0])
 
@@ -26,13 +26,13 @@ func exitExecution(r *REPL, args []string) error {
 	return nil
 }
 
-func echoExecution(r *REPL, args []string) error {
+func echoExec(r *REPL, args []string) error {
 
 	fmt.Println(strings.Join(args, " "))
 	return nil
 }
 
-func pwdExecution(r *REPL, args []string) error {
+func pwdExec(r *REPL, args []string) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -42,7 +42,22 @@ func pwdExecution(r *REPL, args []string) error {
 	return nil
 }
 
-func typeExcecution(r *REPL, args []string) error {
+func cdExec(r *REPL, args []string) error {
+	if len(args) != 1 {
+		return errors.New("Not enough arguments")
+	}
+
+	path := args[0]
+	err := os.Chdir(path)
+
+	if err != nil {
+		return errors.New("cd: " + path + ": no such file or directory")
+	}
+
+	return nil
+}
+
+func typeExec(r *REPL, args []string) error {
 	if len(args) != 1 {
 		return errors.New("wrong number of arguments")
 	}
