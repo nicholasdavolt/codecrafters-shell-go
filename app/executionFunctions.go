@@ -51,7 +51,7 @@ func cdExec(r *REPL, args []string) error {
 	err := os.Chdir(path)
 
 	if err != nil {
-		return errors.New("cd: " + path + ": no such file or directory")
+		return errors.New("cd: " + path + ": No such file or directory")
 	}
 
 	return nil
