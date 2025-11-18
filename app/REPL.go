@@ -85,20 +85,24 @@ func (r *REPL) evaluate(input string) {
 		}
 	}
 
-	cmd := exec.Command(uC.command, uC.args...)
+	path, err := exec.LookPath(uC.command)
 
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	if err == nil {
+		cmd := exec.Command(uC.command, uC.args...)
 
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+
 		return
+
 	}
-
-	return
-
 	r.printBadCommand(input)
 
 }
