@@ -48,6 +48,9 @@ func cdExec(r *REPL, args []string) error {
 	}
 
 	path := args[0]
+	if path == "~" {
+		path = os.Getenv("HOME")
+	}
 	err := os.Chdir(path)
 
 	if err != nil {
