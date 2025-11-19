@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 type REPL struct {
@@ -81,10 +82,14 @@ func (r *REPL) read() {
 }
 
 func (r *REPL) evaluate(input string) {
-	if len(input) == 0 {
+
+	trimmed := strings.TrimSpace(input)
+
+	if len(trimmed) == 0 {
 		return
 	}
-	uC := newUserCommand(input)
+
+	uC := newUserCommand(trimmed)
 
 	for _, cmd := range r.commands {
 		if uC.command == cmd.name {

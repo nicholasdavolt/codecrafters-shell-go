@@ -1,5 +1,9 @@
 package main
 
+import (
+	"strings"
+)
+
 type state int
 
 const (
@@ -28,29 +32,38 @@ func newUserCommand(input string) *userCommand {
 func (c *userCommand) parse() {
 	tokens := make([]string, 0)
 
-	working := ""
+	working := strings.Builder{}
 
-	for i := 0; i < len(c.input); i++ {
-		current := string(c.input[i])
-
+	for _, current := range c.input {
 		switch c.s {
 		case normal:
-			if current == " " {
-				if working == "" {
+			switch current {
+			case ' ':
+				if working.Len() == 0 {
 					continue
 				}
-				tokens = append(tokens, working)
-				working = ""
+				tokens = append(tokens, working.String())
+				working.Reset()
 				continue
+			case '\'':
+				c.s = singleQuote
+				continue
+			default:
+				working.WriteRune(current)
 			}
-
-			working += current
+		case singleQuote:
+			switch current {
+			case '\'':
+				c.s = normal
+				continue
+			default:
+				working.WriteRune(current)
+			}
 		}
-
 	}
 
-	if working != "" {
-		tokens = append(tokens, working)
+	if working.Len() != 0 {
+		tokens = append(tokens, working.String())
 	}
 
 	switch len(tokens) {

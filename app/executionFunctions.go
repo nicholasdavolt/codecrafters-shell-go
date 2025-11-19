@@ -77,8 +77,8 @@ func typeExec(r *REPL, args []string) error {
 	path, err := exec.LookPath(arg)
 
 	if err != nil {
-		fmt.Println(arg + ": not found")
-		return nil
+
+		return err
 	}
 
 	fmt.Println(arg + " is " + path)
