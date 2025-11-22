@@ -82,6 +82,24 @@ func TestUserCommand_Parse(t *testing.T) {
 			wantCommand:    "echo",
 			wantArgs:       []string{"helloworld"},
 			wantFinalState: normal,
+		},
+		{
+			name:        "basic double quotes",
+			input:       "echo \"hello world\"",
+			wantCommand: "echo",
+			wantArgs:    []string{"hello world"},
+		},
+		{
+			name:        "double quotes multiple spaces",
+			input:       "echo \"hello     world\"",
+			wantCommand: "echo",
+			wantArgs:    []string{"hello     world"},
+		},
+		{
+			name:        "double quotes surrounding single quotes",
+			input:       "echo \"hello wor'ld\"",
+			wantCommand: "echo",
+			wantArgs:    []string{"hello wor'ld"},
 		}}
 
 	for _, tt := range tests {

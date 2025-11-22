@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"strings"
 )
 
@@ -9,6 +11,7 @@ type state int
 const (
 	normal state = iota
 	singleQuote
+	doubleQuote
 )
 
 type userCommand struct {
@@ -48,6 +51,8 @@ func (c *userCommand) parse() {
 			case '\'':
 				c.s = singleQuote
 				continue
+			case '"':
+				c.s = doubleQuote
 			default:
 				working.WriteRune(current)
 			}
@@ -59,7 +64,21 @@ func (c *userCommand) parse() {
 			default:
 				working.WriteRune(current)
 			}
+		case doubleQuote:
+			switch current {
+			case '"':
+				c.s = normal
+				continue
+			default:
+				working.WriteRune(current)
+			}
 		}
+
+	}
+
+	if c.s != normal {
+		//todo: implement full posix quoting handling
+		fmt.Fprintln(os.Stderr, "invalid quoting")
 	}
 
 	if working.Len() != 0 {
