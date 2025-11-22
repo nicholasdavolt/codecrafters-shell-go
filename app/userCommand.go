@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -12,6 +11,7 @@ const (
 	normal state = iota
 	singleQuote
 	doubleQuote
+	escape
 )
 
 type userCommand struct {
@@ -21,18 +21,21 @@ type userCommand struct {
 	s       state
 }
 
-func newUserCommand(input string) *userCommand {
+func newUserCommand(input string) (*userCommand, error) {
 
 	c := userCommand{
 		input: input,
 		s:     normal,
 	}
-	c.parse()
+	err := c.parse()
+	if err != nil {
+		return nil, err
+	}
 
-	return &c
+	return &c, nil
 }
 
-func (c *userCommand) parse() {
+func (c *userCommand) parse() error {
 	tokens := make([]string, 0)
 
 	working := strings.Builder{}
@@ -53,6 +56,10 @@ func (c *userCommand) parse() {
 				continue
 			case '"':
 				c.s = doubleQuote
+				continue
+			case '\\':
+				c.s = escape
+				continue
 			default:
 				working.WriteRune(current)
 			}
@@ -72,13 +79,15 @@ func (c *userCommand) parse() {
 			default:
 				working.WriteRune(current)
 			}
+		case escape:
+			working.WriteRune(current)
+			c.s = normal
 		}
 
 	}
 
 	if c.s != normal {
-		//todo: implement full posix quoting handling
-		fmt.Fprintln(os.Stderr, "invalid quoting")
+		return fmt.Errorf("improper quoting")
 	}
 
 	if working.Len() != 0 {
@@ -90,11 +99,12 @@ func (c *userCommand) parse() {
 		c.command = ""
 	case 1:
 		c.command = tokens[0]
-		c.args = make([]string, 0)
+		c.args = nil
 	default:
 		c.command = tokens[0]
 		c.args = tokens[1:]
 
 	}
 
+	return nil
 }

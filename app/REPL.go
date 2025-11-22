@@ -89,7 +89,11 @@ func (r *REPL) evaluate(input string) {
 		return
 	}
 
-	uC := newUserCommand(trimmed)
+	uC, err := newUserCommand(trimmed)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
 
 	for _, cmd := range r.commands {
 		if uC.command == cmd.name {
@@ -101,7 +105,7 @@ func (r *REPL) evaluate(input string) {
 		}
 	}
 
-	_, err := exec.LookPath(uC.command)
+	_, err = exec.LookPath(uC.command)
 
 	if err == nil {
 		cmd := exec.Command(uC.command, uC.args...)
@@ -124,5 +128,5 @@ func (r *REPL) evaluate(input string) {
 }
 
 func (r *REPL) printBadCommand(input string) {
-	fmt.Fprintln(os.Stdout, input+": command not found")
+	fmt.Fprintln(os.Stderr, input+": command not found")
 }

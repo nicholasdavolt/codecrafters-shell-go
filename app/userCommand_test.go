@@ -24,7 +24,7 @@ func TestUserCommand_Parse(t *testing.T) {
 			name:           "single command no args",
 			input:          "echo",
 			wantCommand:    "echo",
-			wantArgs:       []string{},
+			wantArgs:       nil,
 			wantFinalState: normal,
 		},
 		{
@@ -84,27 +84,43 @@ func TestUserCommand_Parse(t *testing.T) {
 			wantFinalState: normal,
 		},
 		{
-			name:        "basic double quotes",
-			input:       "echo \"hello world\"",
-			wantCommand: "echo",
-			wantArgs:    []string{"hello world"},
+			name:           "basic double quotes",
+			input:          "echo \"hello world\"",
+			wantCommand:    "echo",
+			wantArgs:       []string{"hello world"},
+			wantFinalState: normal,
 		},
 		{
-			name:        "double quotes multiple spaces",
-			input:       "echo \"hello     world\"",
-			wantCommand: "echo",
-			wantArgs:    []string{"hello     world"},
+			name:           "double quotes multiple spaces",
+			input:          "echo \"hello     world\"",
+			wantCommand:    "echo",
+			wantArgs:       []string{"hello     world"},
+			wantFinalState: normal,
 		},
 		{
-			name:        "double quotes surrounding single quotes",
-			input:       "echo \"hello wor'ld\"",
-			wantCommand: "echo",
-			wantArgs:    []string{"hello wor'ld"},
+			name:           "double quotes surrounding single quotes",
+			input:          "echo \"hello wor'ld\"",
+			wantCommand:    "echo",
+			wantArgs:       []string{"hello wor'ld"},
+			wantFinalState: normal,
+		},
+		{
+			name:           "basic unquoated escape",
+			input:          "echo hello\\ \\ \\ \\ \\ world",
+			wantCommand:    "echo",
+			wantArgs:       []string{"hello     world"},
+			wantFinalState: normal,
 		}}
 
 	for _, tt := range tests {
+
 		t.Run(tt.name, func(t *testing.T) {
-			c := newUserCommand(tt.input)
+			c, err := newUserCommand(tt.input)
+
+			if err != nil {
+				t.Errorf("command = %q has returned %e", c.command, err)
+				t.FailNow()
+			}
 
 			if c.command != tt.wantCommand {
 				t.Errorf("command = %q, want %q", c.command, tt.wantCommand)
