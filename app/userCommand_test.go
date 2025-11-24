@@ -105,10 +105,24 @@ func TestUserCommand_Parse(t *testing.T) {
 			wantFinalState: normal,
 		},
 		{
-			name:           "basic unquoated escape",
+			name:           "basic unquoted escape",
 			input:          "echo hello\\ \\ \\ \\ \\ world",
 			wantCommand:    "echo",
 			wantArgs:       []string{"hello     world"},
+			wantFinalState: normal,
+		},
+		{
+			name:           "\" escape",
+			input:          `echo "hello \" world"`,
+			wantCommand:    "echo",
+			wantArgs:       []string{"hello \" world"},
+			wantFinalState: normal,
+		},
+		{
+			name:           `\\ escape`,
+			input:          `echo "hello \\ world"`,
+			wantCommand:    "echo",
+			wantArgs:       []string{"hello \\ world"},
 			wantFinalState: normal,
 		}}
 
@@ -118,8 +132,7 @@ func TestUserCommand_Parse(t *testing.T) {
 			c, err := newUserCommand(tt.input)
 
 			if err != nil {
-				t.Errorf("command = %q has returned %e", c.command, err)
-				t.FailNow()
+				t.Fatalf("newUserCommand(%q) returned error: %v", tt.input, err)
 			}
 
 			if c.command != tt.wantCommand {

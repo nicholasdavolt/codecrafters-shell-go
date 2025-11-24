@@ -14,11 +14,14 @@ const (
 	escape
 )
 
+const escapes = `\"`
+
 type userCommand struct {
 	input   string
 	command string
 	args    []string
 	s       state
+	ps      state
 }
 
 func newUserCommand(input string) (*userCommand, error) {
@@ -26,6 +29,7 @@ func newUserCommand(input string) (*userCommand, error) {
 	c := userCommand{
 		input: input,
 		s:     normal,
+		ps:    normal,
 	}
 	err := c.parse()
 	if err != nil {
@@ -39,8 +43,9 @@ func (c *userCommand) parse() error {
 	tokens := make([]string, 0)
 
 	working := strings.Builder{}
+	runeInput := []rune(c.input)
 
-	for _, current := range c.input {
+	for i, current := range runeInput {
 		switch c.s {
 		case normal:
 			switch current {
@@ -50,16 +55,16 @@ func (c *userCommand) parse() error {
 				}
 				tokens = append(tokens, working.String())
 				working.Reset()
-				continue
+
 			case '\'':
 				c.s = singleQuote
-				continue
+				c.ps = normal
 			case '"':
 				c.s = doubleQuote
-				continue
+				c.ps = normal
 			case '\\':
 				c.s = escape
-				continue
+				c.ps = normal
 			default:
 				working.WriteRune(current)
 			}
@@ -67,7 +72,7 @@ func (c *userCommand) parse() error {
 			switch current {
 			case '\'':
 				c.s = normal
-				continue
+				c.ps = singleQuote
 			default:
 				working.WriteRune(current)
 			}
@@ -75,13 +80,28 @@ func (c *userCommand) parse() error {
 			switch current {
 			case '"':
 				c.s = normal
-				continue
+				c.ps = doubleQuote
+
+			case '\\':
+
+				if isEscape(runeInput[i+1]) {
+					c.ps = doubleQuote
+					c.s = escape
+
+				} else {
+					working.WriteRune(current)
+				}
+
 			default:
 				working.WriteRune(current)
+
 			}
 		case escape:
+
 			working.WriteRune(current)
-			c.s = normal
+
+			c.s = c.ps
+			c.ps = escape
 		}
 
 	}
@@ -107,4 +127,13 @@ func (c *userCommand) parse() error {
 	}
 
 	return nil
+}
+
+func isEscape(r rune) bool {
+	for _, b := range escapes {
+		if r == b {
+			return true
+		}
+	}
+	return false
 }
